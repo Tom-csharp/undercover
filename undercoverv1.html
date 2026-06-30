@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IMPOSTEUR</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0a0e17; --surface:#131a2b; --surface-2:#1a2238; --border:#232c44;
+  --text:#edeff5; --muted:#8a93ad; --teal:#4fd1c5; --teal-dim:#234b47;
+  --coral:#ff5c7a; --coral-dim:#4a2230; --gold:#ffd166; --radius:18px;
+  --shine:rgba(255,255,255,.09); --aurora1:rgba(255,92,122,.16);
+  --aurora2:rgba(139,61,255,.14); --aurora3:rgba(79,209,197,.12); --grad-mid:#8b3dff;
+}
+html[data-theme="light"]{
+  --bg:#e7ebf3; --surface:#ffffff; --surface-2:#f2f4fa; --border:#dfe3ee;
+  --text:#1b2559; --muted:#7b86a6; --teal:#1fa999; --teal-dim:#d9f5ef;
+  --coral:#ef4f86; --coral-dim:#ffe1ea; --gold:#e8970f;
+  --shine:rgba(91,71,255,.06); --aurora1:rgba(106,92,255,.16);
+  --aurora2:rgba(45,212,191,.14); --aurora3:rgba(239,79,134,.10); --grad-mid:#5b47ff;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  position:relative; background:var(--bg); color:var(--text);
+  font-family:'Inter',sans-serif; min-height:100vh;
+  display:flex; justify-content:center; overflow-x:hidden;
+  transition:background .35s, color .35s;
+}
+body::before{
+  content:''; position:fixed; inset:-10%; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 8%, var(--aurora1) 0%, transparent 45%),
+    radial-gradient(circle at 85% 18%, var(--aurora2) 0%, transparent 45%),
+    radial-gradient(circle at 30% 95%, var(--aurora3) 0%, transparent 45%);
+  animation:auroraMove 18s ease-in-out infinite alternate;
+}
+@keyframes auroraMove{0%{transform:scale(1) translate(0,0);}100%{transform:scale(1.08) translate(2%,3%);}}
+
+/* ── Particles canvas ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;}
+
+/* ── Theme toggle ── */
+.theme-toggle{
+  position:fixed; top:16px; right:16px; z-index:30;
+  width:44px; height:44px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:19px; cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.2);
+  transition:background .3s, border-color .3s, transform .2s;
+}
+.theme-toggle:active{transform:scale(.85) rotate(18deg);}
+
+/* ── App shell ── */
+.app{position:relative;z-index:1;width:100%;max-width:460px;min-height:100vh;padding:24px 18px 36px;display:flex;flex-direction:column;}
+
+/* ── Screen transitions ── */
+.screen{display:none;flex:1;flex-direction:column;}
+.screen.active{display:flex;animation:fadeIn .42s cubic-bezier(.2,.8,.2,1);}
+.screen.fade-out{animation:fadeOut .2s ease forwards;pointer-events:none;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px) scale(.985);}to{opacity:1;transform:none;}}
+@keyframes fadeOut{to{opacity:0;transform:translateY(-8px) scale(.988);}}
+
+/* ── Brand ── */
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.brand-mark{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--coral),var(--grad-mid) 55%,var(--teal));
+  background-size:220% 220%; animation:gradShift 5s ease infinite;
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+  box-shadow:0 4px 20px rgba(255,92,122,.3); flex-shrink:0;
+}
+@keyframes gradShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.brand h1{font-family:'Space Grotesk',sans-serif;font-size:26px;letter-spacing:1.5px;margin:0;font-weight:700;}
+.brand h1 span{color:var(--coral);}
+.tagline{color:var(--muted);font-size:13.5px;margin:0 0 24px;line-height:1.5;}
+
+/* ── Panel ── */
+.panel{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px; margin-bottom:14px;
+  transition:background .35s, border-color .35s, transform .18s;
+}
+.panel:hover{border-color:color-mix(in srgb, var(--teal) 35%, var(--border));}
+.panel-title{
+  font-family:'Space Grotesk',sans-serif; font-size:12px; text-transform:uppercase;
+  letter-spacing:1.3px; color:var(--muted); margin:0 0 13px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+/* ── Stepper ── */
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.stepper-btn{
+  width:48px;height:48px;border-radius:14px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text);font-size:21px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;
+  transition:transform .12s, background .15s, box-shadow .15s;
+  position:relative; overflow:hidden;
+}
+.stepper-btn:active{transform:scale(.86);}
+.stepper-btn::after{
+  content:''; position:absolute; inset:0; border-radius:inherit;
+  background:var(--teal); opacity:0; transform:scale(.3);
+  transition:opacity .25s, transform .25s;
+}
+.stepper-btn:active::after{opacity:.18; transform:scale(1.6);}
+.stepper-btn.disabled{opacity:.3;pointer-events:none;}
+.stepper-val{flex:1;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;}
+.stepper-val.bump{animation:bump .25s cubic-bezier(.3,1.5,.5,1);}
+@keyframes bump{0%{transform:scale(1);}45%{transform:scale(1.22);}100%{transform:scale(1);}}
+.stepper-val small{display:block;font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+.hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+.hint b{color:var(--gold);font-weight:600;}
+
+/* ── Theme chips ── */
+.chip-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+.chip{
+  border:1.5px solid var(--border); background:var(--surface-2); border-radius:13px;
+  padding:11px 10px; font-size:13px; font-weight:600; color:var(--text);
+  display:flex; align-items:center; gap:8px; cursor:pointer;
+  transition:border-color .18s, background .18s, transform .13s, box-shadow .2s, color .18s;
+  position:relative; overflow:hidden; user-select:none;
+}
+.chip::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, var(--teal), var(--grad-mid));
+  opacity:0; transition:opacity .22s;
+}
+.chip .chip-txt{position:relative;z-index:1;}
+.chip span.emoji{font-size:16px; position:relative; z-index:1; transition:transform .25s;}
+.chip.full{grid-column:1/-1;justify-content:center;}
+.chip.active{border-color:var(--teal); color:var(--teal); box-shadow:0 0 0 1px var(--teal);}
+.chip.active::before{opacity:.13;}
+.chip.active span.emoji{transform:scale(1.2) rotate(-5deg);}
+.chip:active{transform:scale(.93);}
+.chip-count{
+  margin-left:auto; position:relative; z-index:1;
+  background:var(--teal); color:#0a0e17; font-size:10px; font-weight:800;
+  width:18px; height:18px; border-radius:50%;
+  display:none; align-items:center; justify-content:center;
+}
+.chip.active .chip-count{display:flex; animation:popIn .25s cubic-bezier(.3,1.5,.5,1);}
+
+/* ── Names ── */
+.name-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;animation:slideRight .3s ease both;}
+@keyframes slideRight{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+.name-row .num{width:26px;height:26px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);font-weight:700;flex-shrink:0;}
+.name-row input{flex:1;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s, box-shadow .2s, background .3s;}
+.name-row input:focus{border-color:var(--teal); box-shadow:0 0 0 3px rgba(79,209,197,.12);}
+
+/* ── Buttons ── */
+.btn{
+  border:none; border-radius:15px; padding:16px;
+  font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; letter-spacing:.3px;
+  cursor:pointer; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .13s, filter .15s, box-shadow .2s;
+  position:relative; overflow:hidden;
+}
+.btn::after{
+  content:''; position:absolute; inset:0; border-radius:inherit;
+  background:rgba(255,255,255,.15); opacity:0; transform:scaleX(0);
+  transform-origin:left; transition:opacity .3s, transform .3s;
+}
+.btn:hover::after{opacity:1; transform:scaleX(1);}
+.btn:active{transform:scale(.955);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--coral),var(--grad-mid) 60%,var(--teal));
+  background-size:220% 220%; color:#0a0e17;
+  box-shadow:0 8px 26px rgba(255,92,122,.28);
+  animation:gradShift 6s ease infinite;
+}
+.btn-primary:hover{filter:brightness(1.07); box-shadow:0 12px 32px rgba(255,92,122,.38);}
+.btn-ghost{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border);}
+.btn-outline{background:transparent;color:var(--muted);border:1.5px solid var(--border);}
+.spacer{flex:1;}
+.btn-row{display:flex;gap:10px;margin-top:10px;}
+.btn-row .btn{flex:1;}
+
+/* ── Launch btn pulse ── */
+.btn-launch{
+  position:relative;
+}
+.btn-launch::before{
+  content:''; position:absolute; inset:0; border-radius:15px;
+  background:linear-gradient(135deg,var(--coral),var(--grad-mid) 60%,var(--teal));
+  opacity:.35; animation:launchPulse 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes launchPulse{0%,100%{transform:scale(1); opacity:.35;}50%{transform:scale(1.06); opacity:0;}}
+
+/* ── Advanced settings (collapse) ── */
+.collapse-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.collapse-chevron{color:var(--muted);font-size:14px;transition:transform .3s ease;}
+.collapse-chevron.open{transform:rotate(180deg);}
+.collapse-body{max-height:0;overflow:hidden;transition:max-height .38s cubic-bezier(.4,0,.2,1);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-row .txt{flex:1;}
+.toggle-row .label{font-size:13.5px;font-weight:600;}
+.toggle-row .desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.switch{width:48px;height:27px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border);position:relative;cursor:pointer;flex-shrink:0;transition:background .28s,border-color .28s;}
+.switch::after{content:'';position:absolute;top:2.5px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .28s cubic-bezier(.4,1.4,.6,1), background .28s;}
+.switch.on{background:linear-gradient(135deg,var(--teal),#2ea89c);border-color:var(--teal);}
+.switch.on::after{transform:translateX(20px);background:#0a0e17;}
+.sub-stepper{display:flex;align-items:center;gap:12px;margin-top:6px;}
+.sub-stepper .stepper-btn{width:36px;height:36px;font-size:16px;border-radius:10px;}
+.sub-stepper .stepper-val{font-size:18px;}
+
+/* ── Theme count badge ── */
+.theme-summary{
+  margin-top:12px; padding:10px 13px; border-radius:11px;
+  background:var(--surface-2); border:1px solid var(--border);
+  font-size:12.5px; color:var(--muted); line-height:1.5;
+  transition:all .25s; display:flex; align-items:center; gap:8px;
+}
+.theme-summary.has-selection{border-color:var(--teal); color:var(--teal);}
+.theme-summary .badge-count{
+  background:linear-gradient(135deg,var(--teal),var(--grad-mid));
+  color:#0a0e17; font-size:11px; font-weight:800;
+  padding:2px 8px; border-radius:20px; flex-shrink:0;
+  transition:transform .3s cubic-bezier(.3,1.5,.5,1);
+}
+.theme-summary.has-selection .badge-count{transform:scale(1.1);}
+
+/* ── Pass screen ── */
+.center-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;}
+.progress-track{display:flex;align-items:center;gap:0;margin-bottom:34px;width:100%;max-width:220px;}
+.prog-seg{flex:1;height:4px;border-radius:2px;background:var(--border);margin:0 2px;transition:background .4s, transform .3s;}
+.prog-seg.done{background:var(--teal);}
+.prog-seg.current{background:linear-gradient(90deg,var(--coral),var(--grad-mid));transform:scaleY(1.5);}
+
+.pass-icon{font-size:52px;margin-bottom:18px;opacity:.9;animation:floatBob 2.8s ease-in-out infinite;}
+@keyframes floatBob{0%,100%{transform:translateY(0) rotate(0);}30%{transform:translateY(-9px) rotate(-3deg);}65%{transform:translateY(-4px) rotate(2deg);}}
+.pass-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+.pass-name{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;margin-bottom:32px;}
+.pass-name .name-letter{display:inline-block; animation:letterDrop .4s cubic-bezier(.3,1.4,.5,1) both;}
+@keyframes letterDrop{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:none;}}
+
+/* ── Flip card ── */
+.card-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.flip-card{width:265px;height:348px;perspective:1300px;margin-bottom:28px;cursor:pointer;}
+.flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .72s cubic-bezier(.34,1.15,.4,1);}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{position:absolute;inset:0;border-radius:24px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px;border:1.5px solid var(--border);overflow:hidden;}
+.flip-front{
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 2px, transparent 2px 14px),
+    linear-gradient(160deg,var(--surface-2),var(--surface));
+}
+.flip-front::after{
+  content:'';position:absolute;top:0;left:-160%;width:55%;height:100%;
+  background:linear-gradient(115deg,transparent,var(--shine),transparent);
+  animation:shine 3.5s ease-in-out infinite;
+}
+@keyframes shine{0%{left:-160%;}55%{left:160%;}100%{left:160%;}}
+.flip-front .ring{
+  width:78px;height:78px;border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;
+  animation:ringPulse 2.4s ease-in-out infinite;
+  background:radial-gradient(circle at 40% 35%, var(--surface-2), var(--surface));
+}
+@keyframes ringPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,92,122,.22), 0 0 0 0 rgba(79,209,197,.12);}
+  50%{box-shadow:0 0 0 16px rgba(255,92,122,0), 0 0 0 32px rgba(79,209,197,0);}
+}
+.flip-front .tap-txt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:4px;}
+.flip-front .tap-sub{font-size:12px;color:var(--muted);}
+.flip-front .tap-arrow{font-size:20px;margin-top:10px;animation:arrowBounce 1.4s ease-in-out infinite;}
+@keyframes arrowBounce{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
+
+.flip-back{transform:rotateY(180deg);text-align:center;}
+.flip-back.role-citizen{background:linear-gradient(155deg,var(--teal-dim),var(--surface));}
+.flip-back.role-impostor{background:linear-gradient(155deg,var(--coral-dim),var(--surface));}
+.flip-back.role-hidden{background:linear-gradient(155deg,rgba(139,61,255,.15),var(--surface));}
+
+.role-tag{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:16px;animation:popIn .42s cubic-bezier(.3,1.5,.5,1) .15s both;}
+@keyframes popIn{0%{opacity:0;transform:scale(.4);}100%{opacity:1;transform:scale(1);}}
+.role-tag.citizen{background:rgba(79,209,197,.16);color:var(--teal);}
+.role-tag.impostor{background:rgba(255,92,122,.16);color:var(--coral);}
+.role-tag.hidden{background:rgba(139,61,255,.16);color:#c9a8ff;}
+.theme-tag{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;animation:fadeInUp .3s ease .05s both;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.word-big{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1.25;word-break:break-word;animation:wordReveal .5s cubic-bezier(.3,1.4,.5,1) .28s both;}
+@keyframes wordReveal{0%{opacity:0;transform:scale(.6) translateY(8px);}100%{opacity:1;transform:none;}}
+.word-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;max-width:205px;animation:fadeInUp .3s ease .5s both;}
+.action-bar{width:100%;max-width:265px;}
+
+/* ── Discuss screen ── */
+.discuss-icon{font-size:58px;margin-bottom:14px;animation:floatBob 3s ease-in-out infinite;}
+.discuss-title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px;}
+.discuss-sub{color:var(--muted);font-size:14px;line-height:1.65;max-width:320px;margin-bottom:4px;}
+.theme-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);padding:7px 14px;border-radius:20px;font-size:12.5px;color:var(--gold);margin:12px 0 20px;font-weight:600;animation:popIn .4s ease;}
+
+/* ── Timer ── */
+.timer-wrap{width:100%;max-width:280px;margin-bottom:20px;}
+.timer-num{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:700;text-align:center;margin-bottom:10px;transition:color .3s;}
+.timer-num.low{color:var(--coral);animation:timerTick 1s ease-in-out infinite;}
+@keyframes timerTick{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
+.timer-bar-bg{width:100%;height:10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;}
+.timer-bar-fill{height:100%;width:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width 1s linear, background .4s;}
+.timer-bar-fill.low{background:linear-gradient(90deg,var(--coral),#ff2d55);}
+.timer-controls{display:flex;gap:8px;margin-top:12px;}
+.timer-controls .btn{padding:11px;font-size:13px;}
+
+/* ── Recap ── */
+.recap-list{width:100%;margin-bottom:18px;}
+.recap-row{
+  display:flex;align-items:center;gap:12px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;
+  margin-bottom:9px;text-align:left;
+  opacity:0;animation:slideIn .42s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px);}to{opacity:1;transform:none;}}
+.recap-row .badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.recap-row.citizen .badge{background:rgba(79,209,197,.16);}
+.recap-row.impostor .badge{background:rgba(255,92,122,.16);}
+.recap-row .info{flex:1;min-width:0;}
+.recap-row .info .nm{font-weight:700;font-size:14px;}
+.recap-row .info .wd{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.recap-row.impostor .info .wd{color:var(--coral);}
+.recap-row.citizen .info .wd{color:var(--teal);}
+.recap-row.impostor{border-color:rgba(255,92,122,.25);}
+
+/* ── Confetti sparks ── */
+.spark{position:fixed;top:-24px;pointer-events:none;z-index:50;animation:sparkFall linear forwards;}
+@keyframes sparkFall{to{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+
+/* ── Ripple ── */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.28);transform:scale(0);animation:rippleAnim .55s ease-out forwards;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
+
+footer.credit{text-align:center;color:var(--border);font-size:11px;margin-top:18px;}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="theme-toggle" id="themeToggle" onclick="toggleColorTheme()">🌙</div>
+<div class="app" id="app">
+
+  <!-- ===== MENU ===== -->
+  <section class="screen active" id="screen-menu">
+    <div class="brand">
+      <div class="brand-mark">🕵️</div>
+      <h1>IMPOST<span>EUR</span></h1>
+    </div>
+    <p class="tagline">Tout le monde reçoit le même mot… sauf l'imposteur, qui doit se fondre dans la masse.</p>
+
+    <div class="panel">
+      <p class="panel-title">Joueurs</p>
+      <div class="stepper">
+        <div class="stepper-btn" onclick="changePlayers(-1)">−</div>
+        <div class="stepper-val" id="playersVal">4<small>joueurs</small></div>
+        <div class="stepper-btn" onclick="changePlayers(1)">+</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Imposteurs</p>
+      <div class="stepper">
+        <div class="stepper-btn" id="impMinus" onclick="changeImpostors(-1)">−</div>
+        <div class="stepper-val" id="impostorsVal">1<small>imposteur</small></div>
+        <div class="stepper-btn" id="impPlus" onclick="changeImpostors(1)">+</div>
+      </div>
+      <p class="hint">Max conseillé : moins de la moitié — pour garder l'avantage aux <b>citoyens</b>.</p>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Thèmes <span style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted);font-size:11px;">(sélection multiple)</span></p>
+      <div class="chip-grid" id="themeGrid"></div>
+      <div class="theme-summary" id="themeSummary">
+        <span class="badge-count" id="themeCountBadge">0</span>
+        <span id="themeSummaryTxt">Aléatoire — tous les thèmes seront mélangés.</span>
+      </div>
+    </div>
+
+    <div class="panel" id="namesPanel">
+      <p class="panel-title">Noms des joueurs
+        <span id="namesToggle" style="cursor:pointer;color:var(--teal);text-transform:none;letter-spacing:0;font-weight:600;">masquer</span>
+      </p>
+      <div id="namesList"></div>
+    </div>
+
+    <div class="panel">
+      <div class="collapse-header" onclick="toggleAdvanced()">
+        <p class="panel-title" style="margin:0;">⚙️ Paramètres avancés</p>
+        <span class="collapse-chevron" id="advChevron">▾</span>
+      </div>
+      <div class="collapse-body" id="advBody">
+        <div style="padding-top:8px;" id="advContent"></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-launch" onclick="rippleBtn(event,this); startGame()">🎮 Lancer la partie</button>
+    <footer class="credit">Pass-and-play · un seul téléphone · tout le monde joue</footer>
+  </section>
+
+  <!-- ===== PASS ===== -->
+  <section class="screen" id="screen-pass">
+    <div class="center-screen">
+      <div class="progress-track" id="progressTrack"></div>
+      <div class="pass-icon">📲</div>
+      <div class="pass-label">Passe le téléphone à</div>
+      <div class="pass-name" id="passName"></div>
+      <button class="btn btn-primary" style="max-width:260px;" onclick="rippleBtn(event,this); goToReveal()">👀 C'est mon tour, je regarde</button>
+      <p class="hint" style="max-width:260px;margin-top:16px;">Assure-toi que les autres ne regardent pas l'écran.</p>
+    </div>
+  </section>
+
+  <!-- ===== REVEAL ===== -->
+  <section class="screen" id="screen-reveal">
+    <div class="card-zone">
+      <div class="flip-card" id="flipCard" onclick="flipCard()">
+        <div class="flip-inner">
+          <div class="flip-face flip-front">
+            <div class="ring">🔒</div>
+            <div class="tap-txt" id="revealNamePrompt">Joueur 1</div>
+            <div class="tap-sub">Touche la carte pour révéler</div>
+            <div class="tap-arrow">👉</div>
+          </div>
+          <div class="flip-face flip-back" id="flipBack">
+            <div class="theme-tag" id="backTheme">Thème</div>
+            <div class="role-tag" id="backRoleTag">Rôle</div>
+            <div class="word-big" id="backWord">Mot</div>
+            <div class="word-note" id="backNote"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-ghost" id="nextPlayerBtn" style="display:none;" onclick="rippleBtn(event,this); nextPlayer()">Mot vu, suivant →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DISCUSS ===== -->
+  <section class="screen" id="screen-discuss">
+    <div class="center-screen">
+      <div class="discuss-icon">🗣️</div>
+      <div class="discuss-title">À vous de jouer !</div>
+      <p class="discuss-sub">Chacun donne un indice lié à son mot, sans le dire. Discutez, puis votez pour démasquer l'imposteur.</p>
+      <div class="theme-pill" id="themePillDiscuss">🎲 Thème : —</div>
+      <div class="timer-wrap" id="timerWrap" style="display:none;">
+        <div class="timer-num" id="timerNum">01:30</div>
+        <div class="timer-bar-bg"><div class="timer-bar-fill" id="timerBar"></div></div>
+        <div class="timer-controls">
+          <button class="btn btn-ghost" id="timerStartBtn" onclick="timerToggle()">▶️ Démarrer</button>
+          <button class="btn btn-outline" onclick="timerReset()">↺ Réinit.</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="max-width:280px;" onclick="rippleBtn(event,this); showRecap()">🔎 Révéler les rôles</button>
+      <div class="btn-row" style="max-width:280px;">
+        <button class="btn btn-outline" onclick="goMenu()">⚙️ Réglages</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RECAP ===== -->
+  <section class="screen" id="screen-recap">
+    <div class="brand" style="margin-bottom:16px;">
+      <div class="brand-mark">🔎</div>
+      <h1 style="font-size:22px;">RÉSULTATS</h1>
+    </div>
+    <div class="theme-pill" id="themePillRecap" style="align-self:flex-start;">Thème : —</div>
+    <div class="recap-list" id="recapList"></div>
+    <div class="spacer"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="rippleBtn(event,this); replaySamePlayers()">🔁 Rejouer</button>
+      <button class="btn btn-outline" onclick="goMenu()">⚙️ Réglages</button>
+    </div>
+  </section>
+
+</div>
+<script>
+var THEMES = {
+  "Animaux": {emoji:"🐾", pairs:[
+    ["Chat","Chaton"],["Chien","Loup"],["Lion","Tigre"],["Cheval","Âne"],["Vache","Buffle"],
+    ["Mouton","Chèvre"],["Poule","Coq"],["Canard","Oie"],["Souris","Rat"],["Éléphant","Rhinocéros"],
+    ["Singe","Gorille"],["Ours","Panda"],["Aigle","Faucon"],["Hibou","Chouette"],["Serpent","Lézard"],
+    ["Tortue","Crocodile"],["Dauphin","Baleine"],["Requin","Espadon"],["Papillon","Abeille"],["Araignée","Scorpion"]
+  ]},
+  "Nourriture": {emoji:"🍽️", pairs:[
+    ["Pizza","Quiche"],["Burger","Sandwich"],["Pâtes","Riz"],["Frites","Chips"],["Glace","Yaourt"],
+    ["Chocolat","Caramel"],["Gâteau","Tarte"],["Croissant","Brioche"],["Fromage","Beurre"],["Soupe","Bouillon"],
+    ["Salade","Crudités"],["Omelette","Œuf au plat"],["Crêpe","Gaufre"],["Sushi","Sashimi"],["Tacos","Burrito"],
+    ["Pain","Baguette"],["Confiture","Miel"],["Café","Thé"],["Jus d'orange","Limonade"],["Bonbon","Chewing-gum"]
+  ]},
+  "Métiers": {emoji:"💼", pairs:[
+    ["Médecin","Infirmier"],["Professeur","Instituteur"],["Policier","Gendarme"],["Pompier","Secouriste"],["Boulanger","Pâtissier"],
+    ["Avocat","Juge"],["Pilote","Hôtesse de l'air"],["Chanteur","Musicien"],["Acteur","Réalisateur"],["Coiffeur","Esthéticienne"],
+    ["Cuisinier","Serveur"],["Plombier","Électricien"],["Architecte","Ingénieur"],["Vétérinaire","Éleveur"],["Journaliste","Photographe"],
+    ["Footballeur","Entraîneur"],["Astronaute","Pilote d'avion"],["Mécanicien","Garagiste"],["Banquier","Comptable"],["Agriculteur","Jardinier"]
+  ]},
+  "Sports": {emoji:"⚽", pairs:[
+    ["Football","Rugby"],["Basketball","Handball"],["Tennis","Badminton"],["Natation","Plongée"],["Cyclisme","Triathlon"],
+    ["Boxe","Karaté"],["Ski","Snowboard"],["Golf","Mini-golf"],["Volleyball","Beach-volley"],["Athlétisme","Marathon"],
+    ["Escalade","Randonnée"],["Surf","Voile"],["Patinage","Hockey"],["Gymnastique","Danse"],["Équitation","Dressage"],
+    ["Pétanque","Bowling"],["Escrime","Judo"],["Ping-pong","Squash"],["Course à pied","Sprint"],["Yoga","Pilates"]
+  ]},
+  "Lieux": {emoji:"🗺️", pairs:[
+    ["Plage","Île"],["Montagne","Colline"],["Forêt","Jungle"],["Désert","Savane"],["Ville","Village"],
+    ["École","Université"],["Hôpital","Clinique"],["Restaurant","Café"],["Musée","Bibliothèque"],["Aéroport","Gare"],
+    ["Piscine","Lac"],["Cinéma","Théâtre"],["Supermarché","Marché"],["Parc","Jardin"],["Château","Palais"],
+    ["Église","Cathédrale"],["Hôtel","Auberge"],["Zoo","Aquarium"],["Stade","Gymnase"],["Ferme","Ranch"]
+  ]},
+  "Objets du quotidien": {emoji:"🧰", pairs:[
+    ["Téléphone","Tablette"],["Ordinateur","Console"],["Télévision","Écran"],["Voiture","Moto"],["Vélo","Trottinette"],
+    ["Montre","Réveil"],["Lunettes","Casque"],["Sac","Valise"],["Parapluie","Imperméable"],["Chaise","Tabouret"],
+    ["Table","Bureau"],["Lit","Canapé"],["Lampe","Bougie"],["Clé","Cadenas"],["Miroir","Cadre photo"],
+    ["Stylo","Crayon"],["Livre","Magazine"],["Ciseaux","Couteau"],["Brosse à dents","Peigne"],["Couverture","Oreiller"]
+  ]},
+  "Voyage & Vacances": {emoji:"✈️", pairs:[
+    ["Avion","Hélicoptère"],["Bateau","Voilier"],["Train","Tramway"],["Bus","Métro"],["Valise","Sac à dos"],
+    ["Passeport","Carte d'identité"],["Camping","Caravane"],["Hôtel","Gîte"],["Plage","Piscine"],["Randonnée","Trekking"],
+    ["Croisière","Excursion"],["Souvenir","Carte postale"],["Visa","Billet d'avion"],["Carte","GPS"],["Boussole","Carte routière"],
+    ["Tente","Sac de couchage"],["Guide touristique","Touriste"],["Douane","Aéroport"],["Location de vacances","Auberge"],["Itinéraire","Trajet"]
+  ]},
+  "École": {emoji:"🏫", pairs:[
+    ["Professeur","Surveillant"],["Élève","Étudiant"],["Cahier","Classeur"],["Stylo","Feutre"],["Récréation","Pause"],
+    ["Cantine","Réfectoire"],["Tableau","Écran"],["Examen","Contrôle"],["Vacances","Week-end"],["Devoirs","Leçons"],
+    ["Cours","Stage"],["Bibliothèque","CDI"],["Gomme","Correcteur"],["Règle","Équerre"],["Trousse","Cartable"],
+    ["Bus scolaire","Vélo"],["Uniforme","Tenue de sport"],["Internat","Pensionnat"],["Diplôme","Certificat"],["Rentrée","Sortie"]
+  ]},
+  "Instruments de musique": {emoji:"🎸", pairs:[
+    ["Guitare","Basse"],["Piano","Clavier"],["Violon","Violoncelle"],["Batterie","Percussions"],["Flûte","Clarinette"],
+    ["Trompette","Trombone"],["Saxophone","Hautbois"],["Harpe","Mandoline"],["Accordéon","Orgue"],["Tambour","Djembé"],
+    ["Banjo","Ukulélé"],["Cor","Tuba"],["Xylophone","Marimba"],["Triangle","Cymbale"],["Maracas","Tambourin"],
+    ["Synthétiseur","Boîte à rythmes"],["Microphone","Haut-parleur"],["Casque audio","Écouteurs"],["Partition","Métronome"],["Chant","Sifflet"]
+  ]},
+  "Météo & Saisons": {emoji:"🌦️", pairs:[
+    ["Pluie","Orage"],["Neige","Grêle"],["Soleil","Chaleur"],["Vent","Tempête"],["Nuage","Brouillard"],
+    ["Arc-en-ciel","Éclair"],["Printemps","Été"],["Automne","Hiver"],["Tornade","Ouragan"],["Sécheresse","Canicule"],
+    ["Givre","Gelée"],["Brume","Rosée"],["Inondation","Tsunami"],["Foudre","Tonnerre"],["Glace","Verglas"],
+    ["Humidité","Moiteur"],["Climat","Météo"],["Parapluie","Ciré"],["Thermomètre","Baromètre"],["Saison sèche","Saison des pluies"]
+  ]},
+  "Manga & Anime": {emoji:"🎌", pairs:[
+    ["Ninja","Samouraï"],["Pirate","Marin"],["Titan","Géant"],["Sabre","Katana"],["Pouvoir","Capacité"],
+    ["Chasseur","Traqueur"],["Démon","Monstre"],["Esprit","Fantôme"],["Combat","Duel"],["Tournoi","Championnat"],
+    ["Entraînement","Apprentissage"],["Maître","Sensei"],["Disciple","Élève"],["Clan","Famille"],["Village","Royaume"],
+    ["Épée","Lame"],["Transformation","Évolution"],["Robot","Mecha"],["Alien","Extraterrestre"],["Magie","Sortilège"],
+    ["Sorcier","Magicien"],["Vengeance","Justice"],["Trahison","Loyauté"],["Héros","Antihéros"],["Méchant","Vilain"],
+    ["Académie","Lycée"],["Arène","Colisée"],["Camarade","Coéquipier"],["Rival","Ennemi"],["Légende","Mythe"],
+    ["Prophétie","Destin"],["Empire","Dynastie"],["Dragon","Phénix"],["Cristal","Pierre précieuse"],["Portail","Téléportation"],
+    ["Voyage temporel","Voyage dimensionnel"],["Île mystérieuse","Continent perdu"],["Bataille finale","Combat décisif"],["Pouvoir caché","Éveil"],["Esprit gardien","Familier"],
+    ["École de magie","Académie de héros"],["Cape","Manteau"],["Masque","Déguisement"],["Mangaka","Dessinateur"],["Cosplay","Déguisement de héros"],
+    ["Convention","Festival"],["Figurine","Statuette"],["Planche de manga","Storyboard"],["Personnage principal","Héros principal"],["Antagoniste","Méchant principal"],
+    ["Shonen","Seinen"],["Shojo","Yuri"],["Pokémon","Digimon"],["Naruto","Boruto"],["One Piece","Fairy Tail"],
+    ["Dragon Ball","Bleach"],["Death Note","Code Geass"],["My Hero Academia","Demon Slayer"],["Attack on Titan","Tokyo Ghoul"],["Sailor Moon","Cardcaptor Sakura"],
+    ["Naruto (Naruto)","Sasuke (Naruto)"],["Luffy (One Piece)","Zoro (One Piece)"],["Goku (Dragon Ball)","Vegeta (Dragon Ball)"],["Deku (My Hero Academia)","Bakugo (My Hero Academia)"],["Eren (Attack on Titan)","Reiner (Attack on Titan)"],
+    ["Tanjiro (Demon Slayer)","Nezuko (Demon Slayer)"],["Kaneki (Tokyo Ghoul)","Tsukiyama (Tokyo Ghoul)"],["Saitama (One Punch Man)","Genos (One Punch Man)"],["Light Yagami (Death Note)","L (Death Note)"],["Edward Elric (Fullmetal Alchemist)","Alphonse Elric (Fullmetal Alchemist)"],
+    ["Gon (Hunter x Hunter)","Killua (Hunter x Hunter)"],["Natsu (Fairy Tail)","Gray (Fairy Tail)"],["Ichigo (Bleach)","Ishida (Bleach)"],["Rimuru (Slime Isekai)","Veldora (Slime Isekai)"],["Asta (Black Clover)","Yuno (Black Clover)"],
+    ["Shinra (Fire Force)","Arthur (Fire Force)"],["Senku (Dr. Stone)","Chrome (Dr. Stone)"],["Guts (Berserk)","Griffith (Berserk)"],["Yuji Itadori (Jujutsu Kaisen)","Megumi Fushiguro (Jujutsu Kaisen)"],["Denji (Chainsaw Man)","Aki (Chainsaw Man)"],
+    ["Thorfinn (Vinland Saga)","Canute (Vinland Saga)"],["Shinji (Evangelion)","Rei (Evangelion)"],["Sora (No Game No Life)","Shiro (No Game No Life)"],["Meliodas (Seven Deadly Sins)","Ban (Seven Deadly Sins)"],["Jotaro (JoJo's Bizarre Adventure)","Dio (JoJo's Bizarre Adventure)"],
+    ["Kageyama (Haikyu!!)","Hinata (Haikyu!!)"],["Kuroko (Kuroko's Basketball)","Kagami (Kuroko's Basketball)"],["Lelouch (Code Geass)","Suzaku (Code Geass)"],["Emma (The Promised Neverland)","Norman (The Promised Neverland)"],["Mob (Mob Psycho 100)","Reigen (Mob Psycho 100)"],
+    ["Seiya (Saint Seiya)","Ikki (Saint Seiya)"],["Yusuke (YuYu Hakusho)","Kurama (YuYu Hakusho)"],["Subaru (Re:Zero)","Reinhard (Re:Zero)"],["Inuyasha (Inuyasha)","Sesshomaru (Inuyasha)"],["Tsunade (Naruto)","Jiraiya (Naruto)"],
+    ["Kakashi (Naruto)","Obito (Naruto)"],["Rin (Blue Exorcist)","Yukio (Blue Exorcist)"],["Kenshin (Rurouni Kenshin)","Sanosuke (Rurouni Kenshin)"],["Alucard (Hellsing)","Alexander (Hellsing)"],["Ippo (Hajime no Ippo)","Takamura (Hajime no Ippo)"],
+    ["All Might (My Hero Academia)","Endeavor (My Hero Academia)"],["Sacha (Pokémon)","Régis (Pokémon)"],["Yugi (Yu-Gi-Oh!)","Kaiba (Yu-Gi-Oh!)"],["Boruto (Boruto)","Kawaki (Boruto)"],["Chainsaw Man (Chainsaw Man)","Katana Man (Chainsaw Man)"],
+    ["Sukuna (Jujutsu Kaisen)","Gojo (Jujutsu Kaisen)"],["Hisoka (Hunter x Hunter)","Illumi (Hunter x Hunter)"],["Sanji (One Piece)","Zoro (One Piece)"],["Gaara (Naruto)","Rock Lee (Naruto)"]
+  ]},
+  "Jeux vidéo": {emoji:"🎮", pairs:[
+    ["Manette","Joystick"],["Console","PC"],["Niveau","Stage"],["Boss final","Mini-boss"],["Checkpoint","Sauvegarde"],
+    ["Power-up","Bonus"],["Multijoueur","Solo"],["Speedrun","Walkthrough"],["Pixel","Voxel"],["Avatar","Personnage"],
+    ["Quête","Mission"],["Inventaire","Sac à dos"],["Coffre","Butin"],["XP","Niveau d'expérience"],["Combo","Enchaînement"],
+    ["Casque VR","Lunettes VR"],["eSport","Tournoi"],["Streamer","Joueur pro"],["Trophée","Succès"],["Glitch","Bug"],
+    ["DLC","Extension"],["Monde ouvert","Open world"],["Pixel art","Rétro gaming"],["Arcade","Borne d'arcade"],["Cheat code","Astuce"],
+    ["Game over","Défaite"],["Respawn","Réapparition"],["Loot","Butin légendaire"],["Craft","Fabrication"],["Skin","Apparence"],
+    ["Lag","Latence"],["Patch","Mise à jour"],["Bêta","Démo"],["Joystick sans fil","Manette filaire"],["Mod","Modification"],
+    ["Serveur","Lobby"],["Clan","Guilde"],["Raid","Donjon"],["NPC","Personnage non-joueur"],["Boss de fin","Boss caché"],
+    ["Sauvegarde auto","Point de contrôle"],["Mario","Sonic"],["Zelda","Metroid"],["Minecraft","Roblox"],["Fortnite","Apex Legends"],
+    ["GTA","Watch Dogs"],["FIFA","PES"],["Call of Duty","Battlefield"],["League of Legends","Dota"],["Overwatch","Valorant"],
+    ["Among Us","Werewolf"],["Pac-Man","Tetris"],["Tomb Raider","Uncharted"],["Final Fantasy","Dragon Quest"],["Animal Crossing","Stardew Valley"],
+    ["Mario (Super Mario)","Luigi (Super Mario)"],["Link (The Legend of Zelda)","Zelda (The Legend of Zelda)"],["Sonic (Sonic the Hedgehog)","Shadow (Sonic the Hedgehog)"],["Kratos (God of War)","Atreus (God of War)"],["Master Chief (Halo)","Arbiter (Halo)"],
+    ["Geralt (The Witcher)","Ciri (The Witcher)"],["Arthur Morgan (Red Dead Redemption 2)","John Marston (Red Dead Redemption 2)"],["Nathan Drake (Uncharted)","Sully (Uncharted)"],["Steve (Minecraft)","Alex (Minecraft)"],["Pikachu (Pokémon)","Évoli (Pokémon)"],
+    ["Samus (Metroid)","Dark Samus (Metroid)"],["Cloud (Final Fantasy VII)","Sephiroth (Final Fantasy VII)"],["Crash (Crash Bandicoot)","Spyro (Spyro the Dragon)"],["Doom Slayer (DOOM)","Isabelle (Animal Crossing)"],["Sans (Undertale)","Papyrus (Undertale)"],
+    ["Gordon Freeman (Half-Life)","Barney (Half-Life)"],["Solid Snake (Metal Gear Solid)","Liquid Snake (Metal Gear Solid)"],["CJ (GTA San Andreas)","Big Smoke (GTA San Andreas)"],["Trevor (GTA V)","Michael (GTA V)"],["Joel (The Last of Us)","Ellie (The Last of Us)"],
+    ["Pac-Man (Pac-Man)","Ms. Pac-Man (Pac-Man)"],["Rayman (Rayman)","Globox (Rayman)"],["Lara Croft (Tomb Raider)","Nathan Drake (Uncharted)"],["Scorpion (Mortal Kombat)","Sub-Zero (Mortal Kombat)"],["Ryu (Street Fighter)","Ken (Street Fighter)"],
+    ["Chun-Li (Street Fighter)","Cammy (Street Fighter)"],["Chell (Portal)","Wheatley (Portal)"],["Agent 47 (Hitman)","Lucas Grey (Hitman)"],["Marcus Fenix (Gears of War)","Dom (Gears of War)"],["Isaac Clarke (Dead Space)","John Carver (Dead Space)"],
+    ["Sora (Kingdom Hearts)","Riku (Kingdom Hearts)"],["Frisk (Undertale)","Chara (Undertale)"],["Cuphead (Cuphead)","Mugman (Cuphead)"],["Knight (Hollow Knight)","Hornet (Hollow Knight)"],["Alucard (Castlevania)","Simon Belmont (Castlevania)"],
+    ["Phoenix Wright (Ace Attorney)","Miles Edgeworth (Ace Attorney)"],["Professeur Layton (Professeur Layton)","Luke (Professeur Layton)"],["Heavy (Team Fortress 2)","Medic (Team Fortress 2)"],["Tracer (Overwatch)","Genji (Overwatch)"],["Jinx (League of Legends)","Vi (League of Legends)"],
+    ["2B (NieR: Automata)","9S (NieR: Automata)"],["Commander Shepard (Mass Effect)","Garrus (Mass Effect)"],["Leon Kennedy (Resident Evil)","Chris Redfield (Resident Evil)"],["Jill Valentine (Resident Evil)","Claire Redfield (Resident Evil)"],["Kirby (Kirby)","King Dedede (Kirby)"],
+    ["Fox McCloud (Star Fox)","Falco (Star Fox)"],["Donkey Kong (Donkey Kong)","Diddy Kong (Donkey Kong)"],["Zagreus (Hades)","Hades (Hades)"],["Vault Boy (Fallout)","Pip-Boy (Fallout)"],["Sly Cooper (Sly Cooper)","Bentley (Sly Cooper)"]
+  ]},
+  "Films & Séries": {emoji:"🎬", pairs:[
+    ["Acteur","Actrice"],["Réalisateur","Producteur"],["Scénario","Script"],["Tournage","Plateau"],["Casting","Audition"],
+    ["Bande-annonce","Teaser"],["Cinéma","Salle de projection"],["Pop-corn","Bonbons"],["Générique","Crédits"],["Saison","Épisode"],
+    ["Spin-off","Préquelle"],["Suite","Remake"],["Documentaire","Reportage"],["Comédie","Drame"],["Thriller","Policier"],
+    ["Horreur","Épouvante"],["Science-fiction","Fantastique"],["Animation","Dessin animé"],["Doublage","Sous-titres"],["Streaming","Plateforme"],
+    ["Box-office","Recette"],["Oscar","César"],["Festival de cinéma","Avant-première"],["Héros","Antihéros"],["Cascade","Effet spécial"],
+    ["Maquillage","Costume"],["Plateau de tournage","Studio"],["Clap","Action"],["Scène coupée","Bonus"],["Cliffhanger","Twist final"],
+    ["Personnage principal","Second rôle"],["Méchant","Antagoniste"],["Intrigue","Scénario complexe"],["Flash-back","Flash-forward"],["Voix off","Narrateur"],
+    ["Bande originale","Musique de film"],["Adaptation","Remake"],["Trilogie","Saga"],["Pilote","Premier épisode"],["Marathon de séries","Binge-watching"],
+    ["Suspense","Cliffhanger"],["Téléfilm","Long métrage"],["Court métrage","Moyen métrage"],["Acteur principal","Vedette"],["Figurant","Cascadeur"],
+    ["Metteur en scène","Réalisateur"],["Scénariste","Dialoguiste"],["Chaîne TV","Plateforme de streaming"],["Critique","Avis du public"],["Audimat","Taux d'audience"],
+    ["Première","Avant-première"],["Sitcom","Feuilleton"],["Série policière","Série judiciaire"],["Western","Film d'aventure"],["Biopic","Film biographique"]
+  ]},
+  "Séries (Personnages)": {emoji:"📺", pairs:[
+    ["Walter White (Breaking Bad)","Jesse Pinkman (Breaking Bad)"],["Sherlock (Sherlock)","Watson (Sherlock)"],["Jon Snow (Game of Thrones)","Daenerys (Game of Thrones)"],["Rick (Rick & Morty)","Morty (Rick & Morty)"],["Michael Scott (The Office)","Dwight Schrute (The Office)"],
+    ["Ted Mosby (How I Met Your Mother)","Barney Stinson (How I Met Your Mother)"],["Eleven (Stranger Things)","Mike (Stranger Things)"],["Joey (Friends)","Chandler (Friends)"],["Ross (Friends)","Rachel (Friends)"],["Harvey Specter (Suits)","Mike Ross (Suits)"],
+    ["Ragnar (Vikings)","Bjorn (Vikings)"],["Thomas Shelby (Peaky Blinders)","Arthur Shelby (Peaky Blinders)"],["Loki (Loki)","Sylvie (Loki)"],["Wanda (WandaVision)","Vision (WandaVision)"],["Homelander (The Boys)","Billy Butcher (The Boys)"],
+    ["Wednesday (Wednesday)","Enid (Wednesday)"],["Dexter (Dexter)","Debra (Dexter)"],["Fox Mulder (The X-Files)","Dana Scully (The X-Files)"],["Gregory House (Dr House)","Wilson (Dr House)"],["Lucifer (Lucifer)","Amenadiel (Lucifer)"],
+    ["Phineas (Phineas & Ferb)","Ferb (Phineas & Ferb)"],["BoJack (BoJack Horseman)","Todd (BoJack Horseman)"],["Dipper (Gravity Falls)","Mabel (Gravity Falls)"],["Finn (Adventure Time)","Jake (Adventure Time)"],["Gumball (Le Monde de Gumball)","Darwin (Le Monde de Gumball)"],
+    ["Boba Fett (The Book of Boba Fett)","The Mandalorian (The Mandalorian)"],["Obi-Wan (Obi-Wan Kenobi)","Anakin (The Clone Wars)"],["Daredevil (Daredevil)","Punisher (Daredevil)"],["Sheldon (The Big Bang Theory)","Leonard (The Big Bang Theory)"],["Penny (The Big Bang Theory)","Amy (The Big Bang Theory)"],
+    ["Klaus (The Umbrella Academy)","Five (The Umbrella Academy)"],["Otis (Sex Education)","Maeve (Sex Education)"],["Spock (Star Trek)","Kirk (Star Trek)"],["Buffy (Buffy contre les vampires)","Willow (Buffy contre les vampires)"],["Tony Soprano (Les Soprano)","Christopher (Les Soprano)"],
+    ["Jimmy McGill (Better Call Saul)","Kim Wexler (Better Call Saul)"],["Kim (Kim Possible)","Ron (Kim Possible)"],["Sam (Supernatural)","Dean (Supernatural)"],["Castiel (Supernatural)","Jack (Supernatural)"],["Pablo Escobar (Narcos)","Steve Murphy (Narcos)"],
+    ["Le Professeur (La Casa de Papel)","Berlin (La Casa de Papel)"],["Tokyo (La Casa de Papel)","Rio (La Casa de Papel)"],["Jake Peralta (Brooklyn Nine-Nine)","Raymond Holt (Brooklyn Nine-Nine)"],["Ted Lasso (Ted Lasso)","Coach Beard (Ted Lasso)"]
+  ]},
+  "Films (Personnages)": {emoji:"🎥", pairs:[
+    ["Batman (The Dark Knight)","Superman (Man of Steel)"],["Iron Man (Avengers)","Captain America (Avengers)"],["Luke Skywalker (Star Wars)","Darth Vader (Star Wars)"],["Harry Potter (Harry Potter)","Voldemort (Harry Potter)"],["Frodo (Le Seigneur des Anneaux)","Sam (Le Seigneur des Anneaux)"],
+    ["Aragorn (Le Seigneur des Anneaux)","Legolas (Le Seigneur des Anneaux)"],["Jack Sparrow (Pirates des Caraïbes)","Barbossa (Pirates des Caraïbes)"],["Neo (Matrix)","Morpheus (Matrix)"],["Terminator (Terminator)","John Connor (Terminator)"],["Marty McFly (Retour vers le futur)","Doc Brown (Retour vers le futur)"],
+    ["Indiana Jones (Indiana Jones)","Han Solo (Star Wars)"],["James Bond (Skyfall)","Ethan Hunt (Mission Impossible)"],["Spiderman (Spider-Man)","Miles Morales (Spider-Verse)"],["Joker (Joker)","Harley Quinn (Suicide Squad)"],["Thanos (Avengers Infinity War)","Darkseid (Justice League)"],
+    ["Shrek (Shrek)","L'Âne (Shrek)"],["Woody (Toy Story)","Buzz Lightyear (Toy Story)"],["Simba (Le Roi Lion)","Mufasa (Le Roi Lion)"],["Lightning McQueen (Cars)","Mater (Cars)"],["Sulley (Monstres & Cie)","Mike Wazowski (Monstres & Cie)"],
+    ["Wall-E (Wall-E)","Eve (Wall-E)"],["Remy (Ratatouille)","Linguini (Ratatouille)"],["Jack Torrance (Shining)","Pennywise (Ça)"],["Hannibal Lecter (Le Silence des Agneaux)","Clarice (Le Silence des Agneaux)"],["Tyler Durden (Fight Club)","Le Narrateur (Fight Club)"],
+    ["John Wick (John Wick)","Caine (John Wick 4)"],["Mad Max (Mad Max)","Furiosa (Mad Max Furiosa)"],["Dominic Toretto (Fast & Furious)","Brian O'Conner (Fast & Furious)"],["Katniss (Hunger Games)","Peeta (Hunger Games)"],["Bella (Twilight)","Edward (Twilight)"],
+    ["Gladiator (Gladiator)","Commodus (Gladiator)"],["Leon (Léon)","Mathilda (Léon)"],["Vincent Vega (Pulp Fiction)","Jules Winnfield (Pulp Fiction)"],["Ace Ventura (Ace Ventura)","The Mask (The Mask)"],["Le Grinch (Le Grinch)","Scrooge (Le Drôle de Noël de Scrooge)"],
+    ["Beetlejuice (Beetlejuice)","Edward (Edward aux mains d'argent)"],["Forrest Gump (Forrest Gump)","Jenny (Forrest Gump)"],["Gollum (Le Hobbit)","Smeagol (Le Seigneur des Anneaux)"],["Paul Atreides (Dune)","Feyd-Rautha (Dune 2)"],["Barbie (Barbie)","Ken (Barbie)"],
+    ["Oppenheimer (Oppenheimer)","Einstein (Oppenheimer)"],["Deadpool (Deadpool)","Wolverine (Logan)"],["Po (Kung Fu Panda)","Tai Lung (Kung Fu Panda)"],["Gru (Moi, moche et méchant)","Vector (Moi, moche et méchant)"],["Django (Django Unchained)","Dr. Schultz (Django Unchained)"],
+    ["Tony Montana (Scarface)","Carlito (L'Impasse)"],["Rocky (Rocky)","Apollo Creed (Rocky)"],["Tarzan (Tarzan)","Mowgli (Le Livre de la Jungle)"]
+  ]}
+};
+
+/* ===================== ÉTAT ===================== */
+var settings = {
+  numPlayers:4, numImpostors:1, themes:new Set(), names:[],
+  knowsRole:true, sameWord:true, randomImpostorCount:false,
+  timerEnabled:false, timerDuration:90,
+  randomOrder:false, soundEnabled:true, vibrationEnabled:true, passScreenEnabled:true
+};
+/* ===== PARTICLES ===== */
+(function(){
+  var c=document.getElementById("particles"),ctx=c.getContext("2d"),pts=[];
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize(); window.addEventListener("resize",resize);
+  var isDark=function(){return document.documentElement.getAttribute("data-theme")!=="light";};
+  for(var i=0;i<55;i++) pts.push({
+    x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+    vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22,
+    r:Math.random()*2+.6, a:Math.random()
+  });
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    var col=isDark()?"rgba(255,255,255,":"rgba(91,71,255,";
+    pts.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=c.width; if(p.x>c.width)p.x=0;
+      if(p.y<0)p.y=c.height; if(p.y>c.height)p.y=0;
+      p.a+=.003; if(p.a>1)p.a=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=col+(.35*Math.abs(Math.sin(p.a)))+")";
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== RIPPLE ===== */
+function rippleBtn(e, el){
+  var r=document.createElement("span"); r.className="ripple";
+  var rect=el.getBoundingClientRect();
+  var size=Math.max(rect.width,rect.height)*2;
+  r.style.cssText="width:"+size+"px;height:"+size+"px;left:"+(e.clientX-rect.left-size/2)+"px;top:"+(e.clientY-rect.top-size/2)+"px;";
+  el.appendChild(r); setTimeout(function(){r.remove();},600);
+}
+
+/* ===== ÉTAT ===== */
+var settings={
+  numPlayers:4, numImpostors:1, selectedThemes:new Set(), names:[],
+  knowsRole:true, sameWord:true, randomImpostorCount:false,
+  timerEnabled:false, timerDuration:90,
+  randomOrder:false, soundEnabled:true, vibrationEnabled:true, passScreenEnabled:true
+};
+var game=null, namesVisible=true, advancedOpen=false;
+var timerInterval=null, timerRemaining=90, timerRunning=false;
+var audioCtx=null;
+var isDarkTheme=true;
+
+function maxImpostors(n){return Math.max(1,Math.floor((n-1)/2));}
+
+function clampNames(){
+  while(settings.names.length<settings.numPlayers) settings.names.push("Joueur "+(settings.names.length+1));
+  settings.names.length=settings.numPlayers;
+}
+
+function bump(el){el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");}
+
+function changePlayers(d){
+  var n=settings.numPlayers+d; if(n<3||n>16)return;
+  settings.numPlayers=n;
+  if(settings.numImpostors>maxImpostors(n)) settings.numImpostors=maxImpostors(n);
+  clampNames(); renderMenu(); bump(document.getElementById("playersVal"));
+}
+function changeImpostors(d){
+  if(settings.randomImpostorCount)return;
+  var n=settings.numImpostors+d; if(n<1||n>maxImpostors(settings.numPlayers))return;
+  settings.numImpostors=n; renderMenu(); bump(document.getElementById("impostorsVal"));
+}
+
+/* ===== THEME GRID (multi-select) ===== */
+function renderThemeGrid(){
+  var grid=document.getElementById("themeGrid"); grid.innerHTML="";
+  var sel=settings.selectedThemes;
+  var allActive=(sel.size===0);
+
+  // Chip "Aléatoire"
+  var c0=document.createElement("div");
+  c0.className="chip full"+(allActive?" active":"");
+  c0.innerHTML='<span class="emoji">🎲</span><span class="chip-txt">Aléatoire — tous les thèmes</span>';
+  c0.onclick=function(){ sel.clear(); renderMenu(); animChip(c0); };
+  grid.appendChild(c0);
+
+  Object.keys(THEMES).forEach(function(name){
+    var isActive=sel.has(name);
+    var chip=document.createElement("div");
+    chip.className="chip"+(isActive?" active":"");
+    chip.innerHTML='<span class="emoji">'+THEMES[name].emoji+'</span><span class="chip-txt">'+name+'</span><span class="chip-count">✓</span>';
+    chip.onclick=function(){
+      if(sel.has(name)) sel.delete(name); else sel.add(name);
+      animChip(chip);
+      renderMenu();
+    };
+    grid.appendChild(chip);
+  });
+
+  // Summary bar
+  var summary=document.getElementById("themeSummary");
+  var badge=document.getElementById("themeCountBadge");
+  var txt=document.getElementById("themeSummaryTxt");
+  if(sel.size===0){
+    summary.classList.remove("has-selection");
+    badge.textContent="∞";
+    txt.textContent="Aléatoire — tous les thèmes seront mélangés.";
+  } else {
+    summary.classList.add("has-selection");
+    badge.textContent=sel.size;
+    var names=Array.from(sel);
+    if(names.length===1){
+      txt.textContent="Thème fixe : "+names[0]+" ("+THEMES[names[0]].pairs.length+" paires).";
+    } else {
+      txt.textContent=sel.size+" thèmes sélectionnés · "+names.map(function(n){return THEMES[n].emoji;}).join(" ")+" — tiré au sort à chaque partie.";
+    }
+  }
+}
+
+function animChip(el){
+  el.style.transform="scale(.88)";
+  setTimeout(function(){ el.style.transform=""; }, 160);
+}
+
+/* ===== NOMS ===== */
+function renderNamesList(){
+  var list=document.getElementById("namesList"); list.innerHTML="";
+  document.getElementById("namesPanel").style.display=namesVisible?"block":"none";
+  document.getElementById("namesToggle").textContent=namesVisible?"masquer":"afficher";
+  if(!namesVisible)return;
+  clampNames();
+  settings.names.forEach(function(nm,i){
+    var row=document.createElement("div"); row.className="name-row";
+    row.style.animationDelay=(i*0.045)+"s";
+    row.innerHTML='<div class="num">'+(i+1)+'</div><input type="text" maxlength="18" value="'+nm.replace(/"/g,"&quot;")+'">';
+    row.querySelector("input").oninput=function(e){ settings.names[i]=e.target.value||("Joueur "+(i+1)); };
+    list.appendChild(row);
+  });
+}
+
+/* ===== PARAMÈTRES AVANCÉS ===== */
+function makeToggleRow(label,desc,key,onChange){
+  var row=document.createElement("div"); row.className="toggle-row";
+  row.innerHTML='<div class="txt"><div class="label">'+label+'</div><div class="desc">'+desc+'</div><div id="extra-'+key+'"></div></div>'+
+    '<div class="switch '+(settings[key]?"on":"")+'" id="sw-'+key+'"></div>';
+  row.querySelector(".switch").onclick=function(){
+    settings[key]=!settings[key]; if(onChange)onChange(); renderAdvanced();
+  };
+  return row;
+}
+function renderAdvanced(){
+  var c=document.getElementById("advContent"); c.innerHTML="";
+  c.appendChild(makeToggleRow("👁️ L'imposteur connaît son rôle","Si désactivé, tout le monde reçoit juste son mot — pur bluff.","knowsRole"));
+  c.appendChild(makeToggleRow("🔗 Imposteurs : même mot pour tous","Si plusieurs imposteurs avec cette option désactivée, chacun reçoit un mot différent.","sameWord"));
+  c.appendChild(makeToggleRow("🎲 Nombre d'imposteurs aléatoire","Ignore le réglage manuel et tire un nombre au hasard à chaque partie.","randomImpostorCount",function(){
+    document.getElementById("impMinus").classList.toggle("disabled",settings.randomImpostorCount);
+    document.getElementById("impPlus").classList.toggle("disabled",settings.randomImpostorCount);
+    document.getElementById("impostorsVal").innerHTML=settings.randomImpostorCount?"?<small>aléatoire</small>":settings.numImpostors+"<small>imposteur"+(settings.numImpostors>1?"s":"")+"</small>";
+  }));
+  var tRow=makeToggleRow("⏱️ Minuteur de discussion","Compte à rebours pendant la phase de discussion.","timerEnabled");
+  c.appendChild(tRow);
+  if(settings.timerEnabled){
+    var ex=tRow.querySelector("#extra-timerEnabled");
+    ex.innerHTML='<div class="sub-stepper"><div class="stepper-btn" onclick="changeTimerDuration(-15)">−</div><div class="stepper-val" id="timerDurVal">'+formatTime(settings.timerDuration)+'</div><div class="stepper-btn" onclick="changeTimerDuration(15)">+</div></div>';
+  }
+  c.appendChild(makeToggleRow("🔀 Ordre aléatoire","Mélange l'ordre des joueurs à chaque manche.","randomOrder"));
+  c.appendChild(makeToggleRow("🙈 Écran de passage","Affiche une transition entre chaque joueur pour éviter les regards.","passScreenEnabled"));
+  c.appendChild(makeToggleRow("🔊 Effets sonores","Sons à la révélation et lors du minuteur.","soundEnabled"));
+  c.appendChild(makeToggleRow("📳 Vibrations","Légère vibration à la révélation du mot.","vibrationEnabled"));
+  if(advancedOpen){
+    var body=document.getElementById("advBody");
+    body.style.maxHeight=body.scrollHeight+"px";
+  }
+}
+function changeTimerDuration(d){
+  var n=settings.timerDuration+d; if(n<30||n>600)return;
+  settings.timerDuration=n; renderAdvanced();
+}
+function toggleAdvanced(){
+  advancedOpen=!advancedOpen;
+  var body=document.getElementById("advBody"); var ch=document.getElementById("advChevron");
+  ch.classList.toggle("open",advancedOpen);
+  body.style.maxHeight=advancedOpen?body.scrollHeight+"px":"0";
+}
+
+function renderMenu(){
+  document.getElementById("playersVal").innerHTML=settings.numPlayers+"<small>joueurs</small>";
+  document.getElementById("impostorsVal").innerHTML=settings.randomImpostorCount?"?<small>aléatoire</small>":settings.numImpostors+"<small>imposteur"+(settings.numImpostors>1?"s":"")+"</small>";
+  document.getElementById("impMinus").classList.toggle("disabled",settings.randomImpostorCount);
+  document.getElementById("impPlus").classList.toggle("disabled",settings.randomImpostorCount);
+  renderThemeGrid(); renderNamesList(); renderAdvanced();
+}
+document.getElementById("namesToggle").onclick=function(){ namesVisible=!namesVisible; renderNamesList(); };
+
+/* ===== SON / VIBRATION ===== */
+function ensureAudio(){ if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} return audioCtx;}
+function playBeep(freq,dur,vol){
+  if(!settings.soundEnabled)return; var ctx=ensureAudio(); if(!ctx)return;
+  var o=ctx.createOscillator(),g=ctx.createGain();
+  o.type="sine"; o.frequency.value=freq||440; g.gain.value=vol||.06;
+  o.connect(g); g.connect(ctx.destination); o.start();
+  g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+(dur||150)/1000);
+  o.stop(ctx.currentTime+(dur||150)/1000+.02);
+}
+function vibrate(p){ if(settings.vibrationEnabled&&navigator.vibrate) navigator.vibrate(p); }
+
+/* ===== TRANSITIONS ===== */
+function goToScreen(id){
+  var cur=document.querySelector(".screen.active");
+  var next=document.getElementById("screen-"+id);
+  if(cur===next)return;
+  if(cur){ cur.classList.add("fade-out"); setTimeout(function(){ cur.classList.remove("active","fade-out"); next.classList.add("active"); },200); }
+  else next.classList.add("active");
+}
+
+/* ===== LOGIQUE JEU ===== */
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+function startGame(){
+  clampNames();
+  var sel=settings.selectedThemes;
+  var pool=(sel.size===0)?Object.keys(THEMES):Array.from(sel);
+  var themeKey=pool[Math.floor(Math.random()*pool.length)];
+  var pairs=THEMES[themeKey].pairs;
+  var mainPair=pairs[Math.floor(Math.random()*pairs.length)];
+  var civilWord=mainPair[0], impostorWord=mainPair[1];
+
+  var nImp=settings.randomImpostorCount?(1+Math.floor(Math.random()*maxImpostors(settings.numPlayers))):settings.numImpostors;
+  var indices=shuffle(Array.from({length:settings.numPlayers},function(_,i){return i;}));
+  var impSet=new Set(indices.slice(0,nImp));
+
+  var impostorWords=[];
+  if(!settings.sameWord&&nImp>1){
+    var others=shuffle(pairs.filter(function(p){return p[1]!==impostorWord;}));
+    var pool2=[]; for(var k=0;k<others.length&&pool2.length<nImp;k++){if(pool2.indexOf(others[k][1])===-1)pool2.push(others[k][1]);}
+    while(pool2.length<nImp)pool2.push(impostorWord);
+    impostorWords=shuffle(pool2).slice(0,nImp);
+  }
+
+  var order=settings.names.map(function(n,i){return{name:n,idx:i};});
+  if(settings.randomOrder)order=shuffle(order);
+  var ic=0;
+  var players=order.map(function(o){
+    var isImp=impSet.has(o.idx);
+    var word=isImp?((!settings.sameWord&&nImp>1)?impostorWords[ic++]:impostorWord):civilWord;
+    return{name:o.name,isImpostor:isImp,word:word};
+  });
+
+  game={theme:themeKey,emoji:THEMES[themeKey].emoji,civilWord:civilWord,impostorWord:impostorWord,players:players,current:0};
+  if(settings.passScreenEnabled){goToScreen("pass");renderPassScreen();}
+  else{goToScreen("reveal");renderReveal();}
+}
+
+/* ===== PASS ===== */
+function renderPassScreen(){
+  var total=game.players.length;
+  var track=document.getElementById("progressTrack"); track.innerHTML="";
+  for(var i=0;i<total;i++){
+    var s=document.createElement("div");
+    s.className="prog-seg"+(i<game.current?" done":"")+(i===game.current?" current":"");
+    track.appendChild(s);
+  }
+  // Animated name letters
+  var name=game.players[game.current].name;
+  var el=document.getElementById("passName"); el.innerHTML="";
+  name.split("").forEach(function(ch,i){
+    var sp=document.createElement("span"); sp.className="name-letter";
+    sp.textContent=ch==" "?"\u00a0":ch;
+    sp.style.animationDelay=(i*0.045)+"s";
+    el.appendChild(sp);
+  });
+}
+
+function goToReveal(){ goToScreen("reveal"); renderReveal(); }
+
+function renderReveal(){
+  var p=game.players[game.current];
+  var card=document.getElementById("flipCard"); card.classList.remove("flipped");
+  document.getElementById("nextPlayerBtn").style.display="none";
+  document.getElementById("revealNamePrompt").textContent=p.name;
+  var back=document.getElementById("flipBack");
+  var roleClass=settings.knowsRole?(p.isImpostor?"role-impostor":"role-citizen"):"role-hidden";
+  back.className="flip-face flip-back "+roleClass;
+  document.getElementById("backTheme").textContent=game.emoji+" "+game.theme;
+  var rt=document.getElementById("backRoleTag");
+  if(settings.knowsRole){
+    rt.className="role-tag "+(p.isImpostor?"impostor":"citizen");
+    rt.textContent=p.isImpostor?"🕵️ Imposteur":"✅ Citoyen";
+  } else {
+    rt.className="role-tag hidden"; rt.textContent="🎴 Ton mot secret";
+  }
+  document.getElementById("backWord").textContent=p.word;
+  document.getElementById("backNote").textContent=!settings.knowsRole?
+    "Garde ce mot pour toi — certains n'ont pas exactement le même !":
+    p.isImpostor?"Ton mot est proche de celui des autres, mais différent. Fonds-toi dans la masse !":
+    "C'est le mot commun. Donne des indices sans le dire directement.";
+}
+
+function flipCard(){
+  var card=document.getElementById("flipCard");
+  if(card.classList.contains("flipped"))return;
+  card.classList.add("flipped");
+  playBeep(520,140,.05); vibrate(25);
+  setTimeout(function(){ playBeep(700,120,.04); document.getElementById("nextPlayerBtn").style.display="flex"; },380);
+}
+
+function nextPlayer(){
+  game.current++;
+  if(game.current>=game.players.length){
+    goToScreen("discuss");
+    document.getElementById("themePillDiscuss").innerHTML=game.emoji+" Thème : "+game.theme;
+    setupTimerUI();
+  } else if(settings.passScreenEnabled){
+    goToScreen("pass"); renderPassScreen();
+  } else {
+    goToScreen("reveal"); renderReveal();
+  }
+}
+
+/* ===== MINUTEUR ===== */
+function formatTime(s){var m=Math.floor(s/60),sc=s%60;return(m<10?"0":"")+m+":"+(sc<10?"0":"")+sc;}
+function setupTimerUI(){
+  clearInterval(timerInterval); timerInterval=null; timerRunning=false;
+  timerRemaining=settings.timerDuration;
+  var wrap=document.getElementById("timerWrap");
+  if(!settings.timerEnabled){wrap.style.display="none";return;}
+  wrap.style.display="block";
+  document.getElementById("timerNum").textContent=formatTime(timerRemaining);
+  document.getElementById("timerNum").classList.remove("low");
+  var bar=document.getElementById("timerBar"); bar.style.width="100%"; bar.classList.remove("low");
+  document.getElementById("timerStartBtn").textContent="▶️ Démarrer";
+}
+function timerToggle(){
+  if(timerRunning){ clearInterval(timerInterval);timerInterval=null;timerRunning=false; document.getElementById("timerStartBtn").textContent="▶️ Reprendre"; return; }
+  timerRunning=true; document.getElementById("timerStartBtn").textContent="⏸️ Pause";
+  timerInterval=setInterval(function(){
+    timerRemaining--; if(timerRemaining<=0){ timerRemaining=0; clearInterval(timerInterval);timerInterval=null;timerRunning=false; document.getElementById("timerStartBtn").textContent="▶️ Démarrer"; playBeep(880,200,.07);setTimeout(function(){playBeep(660,250,.07);},230); vibrate([200,100,200,100,200]); }
+    var pct=(timerRemaining/settings.timerDuration)*100;
+    document.getElementById("timerBar").style.width=pct+"%";
+    var numEl=document.getElementById("timerNum"); numEl.textContent=formatTime(timerRemaining);
+    var low=timerRemaining<=10; numEl.classList.toggle("low",low); document.getElementById("timerBar").classList.toggle("low",low);
+    if(low&&settings.soundEnabled&&timerRemaining>0) playBeep(440,90,.04);
+  },1000);
+}
+function timerReset(){ setupTimerUI(); }
+
+/* ===== RECAP + confettis ===== */
+function spawnSparkles(){
+  var emojis=["✨","🎉","🕵️","🔎","⭐","🎊","💫","🌟"];
+  for(var i=0;i<20;i++){
+    (function(i){ setTimeout(function(){
+      var s=document.createElement("div"); s.className="spark";
+      s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left=(Math.random()*100)+"vw";
+      s.style.fontSize=(13+Math.random()*16)+"px";
+      s.style.animationDuration=(1.5+Math.random()*1.4)+"s";
+      document.body.appendChild(s); setTimeout(function(){s.remove();},3000);
+    },i*65); })(i);
+  }
+}
+function showRecap(){
+  clearInterval(timerInterval);timerInterval=null;timerRunning=false;
+  goToScreen("recap"); spawnSparkles();
+  var nImp=game.players.filter(function(p){return p.isImpostor;}).length;
+  document.getElementById("themePillRecap").innerHTML=game.emoji+" "+game.theme+"  •  Citoyen : <b style='color:var(--teal)'>"+game.civilWord+"</b>"+(nImp<=1||settings.sameWord?"  •  Imposteur : <b style='color:var(--coral)'>"+game.impostorWord+"</b>":"  •  Mots imposteurs variés");
+  var list=document.getElementById("recapList"); list.innerHTML="";
+  game.players.forEach(function(p,i){
+    var row=document.createElement("div"); row.className="recap-row "+(p.isImpostor?"impostor":"citizen");
+    row.style.animationDelay=(i*.07)+"s";
+    row.innerHTML='<div class="badge">'+(p.isImpostor?"🕵️":"✅")+'</div><div class="info"><div class="nm">'+p.name+'</div><div class="wd">'+(p.isImpostor?"Imposteur · ":"Citoyen · ")+p.word+'</div></div>';
+    list.appendChild(row);
+  });
+}
+function replaySamePlayers(){ startGame(); }
+function goMenu(){ clearInterval(timerInterval);timerInterval=null;timerRunning=false; goToScreen("menu"); renderMenu(); }
+
+/* ===== THÈME CLAIR/SOMBRE ===== */
+function toggleColorTheme(){
+  isDarkTheme=!isDarkTheme;
+  document.documentElement.setAttribute("data-theme",isDarkTheme?"dark":"light");
+  document.getElementById("themeToggle").textContent=isDarkTheme?"🌙":"☀️";
+}
+
+/* ===== INIT ===== */
+clampNames();
+renderMenu();
+</script></body></html>
